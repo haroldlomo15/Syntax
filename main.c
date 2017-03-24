@@ -7,7 +7,6 @@
 //
 
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -198,4 +197,27 @@ void term() {
         factor();
     }
     printf("Exit <term>\n");
+}
+
+void factor() {
+    printf("Enter <factor>\n");
+    if (nxtToken == IDENT || nxtToken == INT_LIT)
+        lex();
+    else {
+        if (nxtToken == LEFT_PAREN) {
+            lex();
+            expr();
+            if (nxtToken == RIGHT_PAREN)
+                lex();
+            else
+                error();
+        }
+        else
+            error();
+    }
+    printf("Exit <factor>\n");;
+}
+
+void error() {
+    printf("!! Error has occurred and been caught at %c !! The expression is %s ****\n", endCharacter, expression);
 }
