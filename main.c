@@ -7,6 +7,7 @@
 //
 
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -15,7 +16,7 @@ int charClass;
 int indexLine;
 int lexLen;
 int token;
-int nextToken;
+int nxtToken;
 size_t expression_length = 0;
 ssize_t read_exression;
 char lexeme [100];
@@ -68,7 +69,7 @@ main(int argc, char* argv[]) {
                 do {
                     lex();
                     expr();
-                } while (nextToken != EOF);
+                } while (nxtToken != EOF);
             }
         }
     }
@@ -78,34 +79,34 @@ int lookup(char ch) {
     switch (ch) {
         case '(':
             addChar();
-            nextToken = LEFT_PAREN;
+            nxtToken = LEFT_PAREN;
             break;
         case ')':
             addChar();
-            nextToken = RIGHT_PAREN;
+            nxtToken = RIGHT_PAREN;
             break;
         case '+':
             addChar();
-            nextToken = ADD_OP;
+            nxtToken = ADD_OP;
             break;
         case '-':
             addChar();
-            nextToken = SUB_OP;
+            nxtToken = SUB_OP;
             break;
         case '*':
             addChar();
-            nextToken = MULT_OP;
+            nxtToken = MULT_OP;
             break;
         case '/':
             addChar();
-            nextToken = DIV_OP;
+            nxtToken = DIV_OP;
             break;
         default:
             addChar();
-            nextToken = EOF;
+            nxtToken = EOF;
             break;
     }
-    return nextToken;
+    return nxtToken;
 }
 
 void addChar() {
@@ -115,4 +116,86 @@ void addChar() {
     }
     else
         printf("Error - lexeme is too long \n");
+}
+
+void getChar() {
+    if (expression[indexLine] != '\n' && expression[indexLine] != '\0') {
+        nextChar = expression[indexLine++];
+        if (isalpha(nextChar)) {
+            charClass = LETTER;
+        }
+        else if (isdigit(nextChar)) {
+            charClass = DIGIT;
+        }
+        else if (nextChar == '\n')
+            charClass = NEWLINE;
+        else charClass = UNKNOWN;
+    }
+    else
+        charClass = EOF;
+}
+
+void getNonBlank() {
+    while (isspace(nextChar))
+        getChar();
+}
+
+int lex() {
+    lexLen = 0;
+    getNonBlank();
+    endCharacter = nextChar;
+    switch (charClass) {
+        case LETTER:
+            addChar();
+            getChar();
+            while (charClass == LETTER || charClass == DIGIT) {
+                addChar();
+                getChar();
+            }
+            nxtToken = IDENT;
+            break;
+        case DIGIT:
+            addChar();
+            getChar();
+            while (charClass == DIGIT) {
+                addChar();
+                getChar();
+            }
+            nxtToken = INT_LIT;
+            break;
+        case UNKNOWN:
+            lookup(nextChar);
+            getChar();
+            break;
+        case EOF:
+            nxtToken = EOF;
+            lexeme[0] = 'E';
+            lexeme[1] = 'O';
+            lexeme[2] = 'F';
+            lexeme[3] = 0;
+            break;
+    }
+    printf("Next token is: %d, Next lexeme is %s\n",
+           nxtToken, lexeme);
+    return nxtToken;
+}
+
+void expr() {
+    printf("Enter <expr>\n");
+    term();
+    while (nxtToken == ADD_OP || nxtToken == SUB_OP) {
+        lex();
+        term();
+    }
+    printf("Exit <expr>\n");
+}
+
+void term() {
+    printf("Enter <term>\n");
+    factor();
+    while (nxtToken == MULT_OP || nxtToken == DIV_OP) {
+        lex();
+        factor();
+    }
+    printf("Exit <term>\n");
 }
