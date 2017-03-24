@@ -55,7 +55,7 @@ void error();
 
 main(int argc, char* argv[]) {
     if (argc != 2) {
-        printf("No file given at function call.... \n");
+        printf("No file with name front.in \n");
         exit(0);
     }
     if ((in_fp = fopen(argv[1], "r")) == NULL)
